@@ -1,0 +1,174 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6 offset-xs-3 col-sm-6 offset-sm-3 col-md-6 offset-md-3 col-lg-6 offset-lg-3   ">
+            <form class="mt-5" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+                
+                <mat-form-field class="full-width">
+                    <!-- <mat-label>Username</mat-label> -->
+                    <input matInput placeholder="Username" formControlName="userName" type="text">
+
+                    <mat-error  *ngIf="!userForm.get('userName').valid && userForm.get('userName').dirty">
+                        <mat-error *ngIf="userForm.get('userName').errors['minlength']">
+                         Username must contain at least 3 digits
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('userName').errors['maxlength']">
+                            Username must not contain more than 10 digits
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('userName').errors['required']">
+                            UserName is Required
+                        </mat-error>
+                    </mat-error>
+                </mat-form-field>
+
+
+                <mat-form-field class="full-width">
+                    <input type="email" matInput placeholder="Email" class="form-control" formControlName="userEmail" name="userEmail">
+
+                    <mat-error *ngIf="!userForm.get('userEmail').valid && userForm.get('userEmail').touched">
+                        <mat-error *ngIf="userForm.get('userEmail').errors['email']">
+                            Please Enter Valid Email!
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('userEmail').errors['required']">
+                            Email is Required
+                        </mat-error>
+                    </mat-error>
+                </mat-form-field>
+                
+                <!-- <mat-label >gender</mat-label> -->
+                <mat-radio-group class="mt-2 mb-2" formControlName="gender" aria-labelledby="gender">
+                    
+                    <mat-radio-button value="male" >male</mat-radio-button>
+                    <mat-radio-button class="ml" value="female" >female</mat-radio-button>
+                    <mat-radio-button class="ml" value="other" >other</mat-radio-button>
+                </mat-radio-group>
+
+                <mat-form-field class="full-width">
+                    <input matInput type="text" formControlName="contact" class="form-control" placeholder="Contact No" name="contact">
+
+                    <mat-error *ngIf="!userForm.get('contact').valid && userForm.get('contact').touched">
+                        <mat-error *ngIf="userForm.get('contact').errors['required']">
+                            Contact Number is Required
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('contact').errors['minlength']">
+                            Contact Number must only contain 10 digits
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('contact').errors['maxlength']">
+                            Contact Number must only contain 10 digits
+                        </mat-error>
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="full-width">
+                    <textarea matInput class="form-control" formControlName="address" rows="4" placeholder="Address" name="address"></textarea>
+                    <mat-error  *ngIf="!userForm.get('address').valid && userForm.get('address').touched">
+                        <mat-error *ngIf="userForm.get('address').errors['required']">
+                            Address is Required
+                        </mat-error>
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label>City</mat-label>
+                    <mat-select formControlName="city">
+                        <mat-option *ngFor="let city of cities" [value]="city">{{city}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div class="text-center">
+
+                    <button [disabled]="!userForm.valid" mat-raised-button color="primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+******************************************************************
+
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
+
+@Component({
+  selector: 'app-sample-mat-form',
+  templateUrl: './sample-mat-form.component.html',
+  styleUrls: ['./sample-mat-form.component.css']
+})
+export class SampleMatFormComponent implements OnInit {
+
+  userForm:FormGroup;
+  cities=['Pune','Bangalore','Mysore'];
+  constructor() { }
+
+  ngOnInit(): void {
+    this.userForm=new FormGroup({
+      userName:new FormControl(null,[Validators.required,Validators.minLength(3),Validators.maxLength(10)]),
+      userEmail:new FormControl(null,[Validators.required,Validators.email]),
+      gender :new FormControl('male',[Validators.required]),
+      contact: new FormControl(null,[Validators.required,Validators.minLength(10),Validators.maxLength(10)]),
+      address: new FormControl(null,[Validators.required]),
+      city: new FormControl(null,[Validators.required])
+    });
+  };
+
+  onSubmit()
+  {
+    console.log(this.userForm.value);
+  }
+}
+
+*******************************
+
+.full-width{
+    width: 100%;
+}
+.ml {
+    margin-left: 16px;
+  }
+  
+  ****************************************
+  import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { SampleFormComponent } from './sample-form/sample-form.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {FormsModule,ReactiveFormsModule} from '@angular/forms';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatRadioModule, MAT_RADIO_DEFAULT_OPTIONS} from '@angular/material/radio';
+import {MatSelectModule} from '@angular/material/select';
+import {MatButtonModule} from '@angular/material/button';
+import { SampleMatFormComponent } from './sample-mat-form/sample-mat-form.component';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+@NgModule({
+  declarations: [
+    AppComponent,
+    SampleFormComponent,
+    SampleMatFormComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatRadioModule,
+    MatSelectModule,
+    MatButtonModule
+  ],
+  providers: [
+    {provide:ErrorStateMatcher,useClass:ShowOnDirtyErrorStateMatcher},
+    {
+      provide: MAT_RADIO_DEFAULT_OPTIONS,
+      useValue: { color: 'primary' },
+  }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
