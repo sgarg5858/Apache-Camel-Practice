@@ -1,0 +1,208 @@
+const Sequelize=require('sequelize');
+
+const db=require('../util/database');
+
+const Form=db.define('form',{
+
+    title:{
+        type:Sequelize.STRING,
+    },
+    subtitle:{
+        type:Sequelize.STRING
+    },
+    host:{
+        type:Sequelize.STRING
+    },
+    description:{
+        type:Sequelize.STRING
+    },
+    greetings:{
+        type:Sequelize.STRING
+    },
+    instructions:{
+        type:Sequelize.STRING
+    },
+    privacycontentInfo:{
+        type:Sequelize.STRING
+    },
+    starts:{
+        type:Sequelize.DATE
+    },
+    ends:{
+        type:Sequelize.DATE
+    },
+    periodicity:{
+        type:Sequelize.INTEGER
+    },
+    minimumgap:{
+        type:Sequelize.INTEGER
+    },
+    maxattempts:{
+        type:Sequelize.INTEGER
+    },
+    status:{
+        type:Sequelize.STRING
+    },
+    createdby:{
+        type:Sequelize.STRING
+    },
+    createdon:{
+        type:Sequelize.DATE
+    },
+    theme:{
+        type:Sequelize.STRING
+    },
+    type:{
+        type:Sequelize.STRING
+    },
+    duration:{
+        type:Sequelize.INTEGER
+    }
+    //define questions here
+
+});
+
+module.exports=Form;
+
+***********************************************************************
+
+const Sequelize=require('sequelize');
+
+const db=require('../util/database');
+
+const Question = db.define('question',{
+    // fid:{
+    //     type:Sequelize.INTEGER,
+    // },
+    description:{
+        type:Sequelize.STRING
+    },
+    type:{
+        type:Sequelize.STRING
+    },
+    options:{
+        type:Sequelize.STRING
+    },
+    validations:{
+        type:Sequelize.STRING
+    },
+    media:{
+        type:Sequelize.STRING
+    },
+    hint:{
+        type:Sequelize.STRING
+    },
+    title:{
+        type:Sequelize.STRING
+    },
+    expectedAnswer:{
+        type:Sequelize.STRING
+    },
+    section:{
+        type:Sequelize.INTEGER
+    }
+});
+
+module.exports=Question;
+***********************************************************
+
+const Sequelize=require('sequelize');
+
+module.exports = new Sequelize('Products', 'postgres', '1234', {
+    host: 'localhost',
+    dialect: 'postgres' 
+  });
+  
+
+
+**************************************************************
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+const Question = require('./models/Question');
+const Form =require('./models/Form');
+const db=require('./util/database');
+
+db.authenticate()
+  .then(
+      console.log('Connected')
+  ).catch(err=>console.log(err));
+
+const app= express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:false}));
+
+app.use((req,res,next)=>{
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    res.setHeader('Access-Control-Allow-Header', 
+    'Content-Type, Accept, Origin, X-Requested-With');
+    
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+    next();
+});
+
+//one to many relationship
+Question.belongsTo(Form,{foreignKey:'formId'})
+Form.hasMany(Question,{foreignKey:'formId'});
+
+// this will sync our models to tables in postgres
+db.sync({force:true})
+    .then((result)=>{
+         console.log(result);
+    app.listen(4000, function () {
+
+        console.log('Server is running.. on Port 4000');
+    });
+    })
+    .catch((error)=>console.log(error))
+
+
+app.get('/addForm',(req,res,next)=>{
+    questions=[
+        {description:'What is your name?',type:JSON.stringify({type:'input'}),options:JSON.stringify({options:'none'}),validations:JSON.stringify({minlength:5}),media:'none',hint:'name',title:'name',expectedAnswer:JSON.stringify({name:'sanjay'}),section:5},
+        {description:'age',type:JSON.stringify({type:'input'}),options:JSON.stringify({options:'none'}),validations:JSON.stringify({minlength:5}),media:'none',hint:'age',title:'name',expectedAnswer:JSON.stringify({age:22}),section:5},
+        {description:'city',type:JSON.stringify({type:'input'}),options:JSON.stringify({options:'none'}),validations:JSON.stringify({minlength:5}),media:'none',hint:'city',title:'name',expectedAnswer:JSON.stringify({city:'pune'}),section:5}
+    ];
+    let responses=[];
+    Form.create({
+        title:'UserInfo',
+        subtitle:'UserData',
+        host:JSON.stringify({name:'Robot'}),
+        description:'Collecting User Data',
+        greetings:'Hi All',
+        instructions:'Fill All Fields',
+        privacycontentInfo:'private',
+        starts:new Date(),
+        ends:new Date(),
+        periodicity:5,
+        minimumgap:5,
+        maxattempts:2,
+        status:'open',
+        createdby:'Sanjay',
+        createdon:new Date(),
+        theme:JSON.stringify({color:'red'}),
+        type:'ok',
+        duration:15,
+        questions:questions
+    },{include:Question}).then(
+        (response)=>{
+            res.send(response);
+        }
+    ).catch((error)=>{
+        console.log(error);
+    })
+})    
+
+
+
+app.get('/getFormsAndQuestions',(req,res,next)=>{
+    Form.findAll({include:Question}).then((response)=>{
+        res.send(response);
+    }
+)})
+
+
+module.exports=app;
